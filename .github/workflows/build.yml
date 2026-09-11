@@ -5,35 +5,19 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/zmkfirmware/zmk-build-base:main
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache west modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.west
-            bootloader
-            modules
-            tools
-            zephyr
-            zmk
-          key: ${{ runner.os }}-build-${{ hashFiles('**/west.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
-
-      - name: Initialize West
-        run: |
-          west init -l config || true
-          west update
-          west zephyr-export
+      - name: Setup Zephyr project
+        uses: zmkfirmware/zmk-action-setup@v2
 
       - name: Build Saphira UF2
-        run: |
-          west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=saphira -DZMK_CONFIG="$(pwd)/config"
+        uses: zmkfirmware/zmk-action-build@v2
+        with:
+          keymap: saphira
+          shield: saphira
+          board: nice_nano_v2
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v4
