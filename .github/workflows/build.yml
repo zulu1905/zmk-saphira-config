@@ -5,27 +5,21 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: zmkfirmware/zmk-build-base:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache west modules
-        uses: actions/cache@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          path: |
-            ~/.west
-            bootloader
-            modules
-            tools
-            zephyr
-            zmk
-          key: ${{ runner.os }}-build-${{ hashFiles('**/west.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-
+          python-version: '3.10'
 
-      - name: Initialize West
+      - name: Install West and Dependencies
+        run: |
+          pip install west
+          pip install sh
+
+      - name: Initialize West Workspace
         run: |
           west init -l config || true
           west update
@@ -35,7 +29,7 @@ jobs:
         run: |
           west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=saphira -DZMK_CONFIG="$(pwd)/config"
 
-      - name: Archive artifacts
+      - name: Archive Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: saphira-firmware
