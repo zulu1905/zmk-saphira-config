@@ -9,10 +9,10 @@ jobs:
       image: zmkfirmware/zmk-build-base:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache west modules
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.west
@@ -36,7 +36,7 @@ jobs:
           west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=saphira -DZMK_CONFIG="$(pwd)/config"
 
       - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: saphira-firmware
           path: build/zephyr/zmk.uf2
