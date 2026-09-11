@@ -5,14 +5,14 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-base:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Cache west modules
         uses: actions/cache@v3
-        env:
-          cache-name: cache-zephyr-modules
         with:
           path: |
             ~/.west
@@ -21,15 +21,22 @@ jobs:
             tools
             zephyr
             zmk
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/west.yml') }}
+          key: ${{ runner.os }}-build-${{ hashFiles('**/west.yml') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
-            ${{ runner.os }}-
 
-      - name: Initialize Zephyr workspace
-        uses: zmkfirmware/zmk-build-action@v1
+      - name: Initialize West
+        run: |
+          west init -l config || true
+          west update
+          west zephyr-export
+
+      - name: Build Saphira UF2
+        run: |
+          west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=saphira -DZMK_CONFIG="$(pwd)/config"
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
         with:
-          snippet: studio
-          board: nice_nano_v2
-          shield: saphira
+          name: saphira-firmware
+          path: build/zephyr/zmk.uf2
