@@ -1,0 +1,40 @@
+#include <dt-bindings/zmk/keys.h>
+
+/ {
+    chosen {
+        zmk,kscan = &kscan0;
+    };
+
+    kscan0: kscan {
+        compatible = "zmk,kscan-gpio-direct";
+        label = "KSCAN";
+        input-gpios =
+            <&pro_micro 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>, /* Sol Tık */
+            <&pro_micro 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>, /* Sağ Tık */
+            <&pro_micro 3 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; /* Orta Tık */
+    };
+};
+
+&pinctrl {
+    spi0_default: spi0_default {
+        group1 {
+            psels = <ZEPHYR_PERIPHERAL_PIN(PSEL_SPI_SCK, 0, 17)>,
+                    <ZEPHYR_PERIPHERAL_PIN(PSEL_SPI_MOSI, 0, 20)>,
+                    <ZEPHYR_PERIPHERAL_PIN(PSEL_SPI_MISO, 0, 22)>;
+        };
+    };
+};
+
+&spi0 {
+    status = "okay";
+    pinctrl-0 = <&spi0_default>;
+    pinctrl-names = "default";
+    cs-gpios = <&pro_micro 10 GPIO_ACTIVE_LOW>;
+
+    adns3090: adns3090@0 {
+        compatible = "pixart,adns3090";
+        reg = <0>;
+        spi-max-frequency = <2000000>;
+        irq-gpios = <&pro_micro 0 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+    };
+};
