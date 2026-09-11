@@ -1,0 +1,2 @@
+config SHIELD_SAPHIRA
+    def_bool $(shields_list_contains,saphira)
