@@ -9,12 +9,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Zephyr project
-        uses: zmkfirmware/zmk-action-setup@v1
-
-      - name: Build Saphira UF2
-        uses: zmkfirmware/zmk-action-build@v1
+      - name: Cache west modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-zephyr-modules
         with:
-          keymap: saphira
-          shield: saphira
+          path: |
+            ~/.west
+            bootloader
+            modules
+            tools
+            zephyr
+            zmk
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Initialize Zephyr workspace
+        uses: zmkfirmware/zmk-build-action@v1
+        with:
+          snippet: studio
           board: nice_nano_v2
+          shield: saphira
