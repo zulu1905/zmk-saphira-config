@@ -8,12 +8,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Build ZMK UF2
-        uses: petejohnston/zmk-builder@main
         with:
-          board: nice_nano_v2
-          shield: saphira
+          submodules: recursive
+
+      - name: Cache West Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.west
+            bootloader
+            modules
+            tools
+            zephyr
+            zmk
+          key: ${{ runner.os }}-zmk-${{ hashFiles('**/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-zmk-
+
+      - name: Install West
+        run: |
+          pip install west
+
+      - name: Initialize West Workspace
+        run: |
+          west init -l config || true
+          west update
+          west zephyr-export
+
+      - name: Build Firmware
+        run: |
+          west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=saphira -DZMK_CONFIG="$(pwd)/config"
 
       - name: Archive Artifacts
         uses: actions/upload-artifact@v4
