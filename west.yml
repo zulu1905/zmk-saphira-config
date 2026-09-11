@@ -2,15 +2,10 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    - name: petejohnston
-      url-base: https://github.com/petejohnston
   projects:
     - name: zmk
       remote: zmkfirmware
       revision: main
       import: app/west.yml
-    - name: zmk-driver-adns3090
-      remote: petejohnston
-      revision: main
   self:
     path: config
