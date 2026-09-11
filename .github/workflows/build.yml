@@ -5,21 +5,27 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zmkfirmware/zmk-build-base:main
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Cache west modules
+        uses: actions/cache@v4
         with:
-          python-version: '3.10'
+          path: |
+            ~/.west
+            bootloader
+            modules
+            tools
+            zephyr
+            zmk
+          key: ${{ runner.os }}-build-${{ hashFiles('**/west.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
 
-      - name: Install West and Dependencies
-        run: |
-          pip install west
-          pip install sh
-
-      - name: Initialize West Workspace
+      - name: Initialize West
         run: |
           west init -l config || true
           west update
