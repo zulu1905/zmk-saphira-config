@@ -1,0 +1,28 @@
+name: Build ZMK Firmware
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache zmk modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.west
+            zmk
+          key: ${{ runner.os }}-zmk-${{ hashFiles('**/west.yml') }}
+
+      - name: Setup Zephyr project
+        uses: zmkfirmware/zmk-action-setup@v1
+
+      - name: Build Saphira UF2
+        uses: zmkfirmware/zmk-action-build@v1
+        with:
+          keymap: saphira
+          shield: saphira
+          board: nice_nano_v2
