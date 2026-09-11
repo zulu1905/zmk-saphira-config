@@ -9,14 +9,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Cache zmk modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.west
-            zmk
-          key: ${{ runner.os }}-zmk-${{ hashFiles('**/west.yml') }}
-
       - name: Setup Zephyr project
         uses: zmkfirmware/zmk-action-setup@v1
 
